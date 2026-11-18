@@ -3,6 +3,7 @@ import {
   ArrowDown,
   ArrowRight,
   AudioLines,
+  Braces,
   Check,
   ChevronDown,
   CreditCard,
@@ -65,10 +66,10 @@ const stories: {
   },
   {
     id: "cv",
-    title: "When they ask about you, it knows your experience.",
+    title: "Your experience, ready for the interview.",
     description:
-      "Add your CV once. Autopilot can use the roles, projects, skills, and results in it to help you shape answers about your own background.",
-    note: "Your real experience, ready when you need it.",
+      "When an interviewer asks about your background, Autopilot can connect the question to roles, projects, and skills in your CV, helping you frame an answer based on work you've actually done.",
+    note: "Suggestions grounded in your own experience.",
   },
 ];
 
@@ -414,9 +415,10 @@ function Questions() {
             <ChevronDown size={18} />
           </summary>
           <p>
-            Autopilot is designed to stay out of screen shares, but this can
-            vary by your operating system and the app you use to share. Test it
-            once before an important session.
+            Autopilot's private overlay is designed to stay hidden during screen
+            sharing and does so 99% of the time. We also recommend checking your
+            screen-sharing preview before an important session, as visibility may
+            vary depending on your operating system and meeting application.
           </p>
         </details>
       </div>
@@ -483,8 +485,9 @@ export function App() {
               </p>
               <p className="hero-description">
                 Autopilot listens to computer audio, detects questions and coding tasks,
-                and helps you respond in real time. Optional Screen Assist and your CV
-                provide relevant context when you need it.
+                and generates answers or code in real time. It can use your CV and optional
+                Screen Assist to tailor those answers to your experience and what's happening
+                on your screen.
               </p>
               <div className="hero-actions">
                 <a className="button button-primary" href="#download">
@@ -501,8 +504,30 @@ export function App() {
                 {release && <> <span /> Latest {release.version}</>}
               </p>
             </div>
-            <div id="live" className="hero-demonstration">
-              <FeatureDemo id="live" hero />
+            <div className="hero-stage">
+              <div className="hero-signal-art" aria-hidden="true">
+                <svg viewBox="0 0 700 580" fill="none" preserveAspectRatio="xMidYMid meet">
+                  <path d="M37 145C152 145 105 40 268 40H640" />
+                  <path d="M60 486H210C323 486 295 552 421 552H671" />
+                  <path d="M574 19V75C574 137 651 120 651 196" />
+                  <circle cx="37" cy="145" r="5" />
+                  <circle cx="268" cy="40" r="5" />
+                  <circle cx="651" cy="196" r="5" />
+                  <circle cx="421" cy="552" r="5" />
+                </svg>
+              </div>
+              <div className="hero-signal-tag hero-signal-tag-a" aria-hidden="true">
+                <span className="hero-tag-icon"><AudioLines size={16} /></span>
+                <span>Computer audio <small>Microphone excluded</small></span>
+                <span className="hero-tag-wave"><i /><i /><i /><i /><i /><i /><i /></span>
+              </div>
+              <div className="hero-signal-tag hero-signal-tag-b" aria-hidden="true">
+                <span className="hero-tag-icon"><Braces size={17} /></span>
+                <span>Answers + code <small>In one workspace</small></span>
+              </div>
+              <div id="live" className="hero-demonstration">
+                <FeatureDemo id="live" hero />
+              </div>
             </div>
           </div>
         </section>
