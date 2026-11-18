@@ -36,6 +36,8 @@ All download buttons use the latest public release from `RaynerdTech/autopilot-d
 
 Keep these exact asset names when publishing a new GitHub Release. The landing page will automatically point to the new latest release without another site change.
 
+The displayed version is also read automatically from the **latest published GitHub Release**, not from a commit or a hardcoded value. The public GitHub API response must include all three installers before that version is shown. When available, download buttons link to the specific release's verified assets; if the API cannot be reached, the version label is hidden and the existing `releases/latest/download/` links remain available. No GitHub token or environment secret is needed. Explicit installer URL overrides still take priority.
+
 ## Optional Vercel overrides
 
 The values in `.env.example` can be added under **Project Settings → Environment Variables** when a repository, installer URL, or support email needs to change. They are optional for the current production setup.

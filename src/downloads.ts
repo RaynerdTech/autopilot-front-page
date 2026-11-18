@@ -14,15 +14,25 @@ const repository = (import.meta.env.VITE_GITHUB_REPOSITORY || DEFAULT_RELEASE_RE
 const validRepository = /^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9_.-]+$/.test(repository)
   && repository !== "your-github-name/your-repository";
 const latestRelease = validRepository ? `https://github.com/${repository}/releases/latest/download/` : "";
+export const releaseRepository = validRepository ? repository : "";
+export const latestReleaseApiUrl = validRepository
+  ? `https://api.github.com/repos/${repository}/releases/latest`
+  : "";
 
 export const releasePageUrl = validRepository
   ? `https://github.com/${repository}/releases/latest`
   : "";
 
+export const customDownloads: Record<Platform, string> = {
+  windows: downloadUrl(import.meta.env.VITE_WINDOWS_DOWNLOAD_URL),
+  "mac-apple": downloadUrl(import.meta.env.VITE_MAC_APPLE_DOWNLOAD_URL),
+  "mac-intel": downloadUrl(import.meta.env.VITE_MAC_INTEL_DOWNLOAD_URL),
+};
+
 export const downloads: Record<Platform, string> = {
-  windows: downloadUrl(import.meta.env.VITE_WINDOWS_DOWNLOAD_URL) || (latestRelease && `${latestRelease}Autopilot-Windows-x64.exe`),
-  "mac-apple": downloadUrl(import.meta.env.VITE_MAC_APPLE_DOWNLOAD_URL) || (latestRelease && `${latestRelease}Autopilot-macOS-Apple-Silicon.dmg`),
-  "mac-intel": downloadUrl(import.meta.env.VITE_MAC_INTEL_DOWNLOAD_URL) || (latestRelease && `${latestRelease}Autopilot-macOS-Intel.dmg`),
+  windows: customDownloads.windows || (latestRelease && `${latestRelease}Autopilot-Windows-x64.exe`),
+  "mac-apple": customDownloads["mac-apple"] || (latestRelease && `${latestRelease}Autopilot-macOS-Apple-Silicon.dmg`),
+  "mac-intel": customDownloads["mac-intel"] || (latestRelease && `${latestRelease}Autopilot-macOS-Intel.dmg`),
 };
 
 const email = (import.meta.env.VITE_SUPPORT_EMAIL || "raynerdtech@gmail.com").trim();

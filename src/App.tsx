@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -16,13 +16,17 @@ import {
 import { FeatureDemo } from "./FeatureDemo";
 import { features, type DemoId } from "./demo-content";
 import {
+  customDownloads,
   detectPlatform,
   downloads,
   hasDownloads,
+  latestReleaseApiUrl,
   releasePageUrl,
+  releaseRepository,
   supportEmail,
   type Platform,
 } from "./downloads";
+import { parsePublishedRelease, type PublishedRelease } from "./releases";
 import { AppleIcon, Brand, WindowsIcon } from "./ui";
 
 const stories: {
@@ -172,14 +176,17 @@ function ControlSection() {
 function DownloadButton({
   platform,
   label,
+  release,
 }: {
   platform: Platform;
   label: string;
+  release: PublishedRelease | null;
 }) {
-  return downloads[platform] ? (
+  const url = customDownloads[platform] || release?.installers[platform] || downloads[platform];
+  return url ? (
     <a
       className="button button-primary platform-download"
-      href={downloads[platform]}
+      href={url}
       data-platform={platform}
       aria-label={`${label} installer`}
     >
@@ -193,7 +200,7 @@ function DownloadButton({
   );
 }
 
-function DownloadSection() {
+function DownloadSection({ release }: { release: PublishedRelease | null }) {
   const [macChip, setMacChip] = useState<"mac-apple" | "mac-intel">(
     "mac-apple",
   );
@@ -246,6 +253,11 @@ function DownloadSection() {
           </div>
         </div>
         <div className="download-options">
+          {release && (
+            <p className="download-version" role="status">
+              Latest release <strong>{release.version}</strong>
+            </p>
+          )}
           {!hasDownloads && (
             <p className="download-availability" role="status">
               Downloads are temporarily unavailable. Please check back shortly.
@@ -269,7 +281,7 @@ function DownloadSection() {
             <p className="platform-details">
               Windows x64 <span>.exe installer</span>
             </p>
-            <DownloadButton platform="windows" label="Download for Windows" />
+            <DownloadButton platform="windows" label="Download for Windows" release={release} />
           </article>
           <article
             className={
@@ -308,6 +320,7 @@ function DownloadSection() {
             </div>
             <DownloadButton
               platform={macChip}
+              release={release}
               label={
                 macChip === "mac-apple"
                   ? "Download for Apple Silicon"
@@ -412,6 +425,28 @@ function Questions() {
 }
 
 export function App() {
+  const [release, setRelease] = useState<PublishedRelease | null>(null);
+
+  useEffect(() => {
+    if (!latestReleaseApiUrl) return;
+    const controller = new AbortController();
+    void fetch(latestReleaseApiUrl, {
+      headers: { Accept: "application/vnd.github+json" },
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Release lookup unavailable");
+        return response.json() as Promise<unknown>;
+      })
+      .then((value) => {
+        if (!controller.signal.aborted) setRelease(parsePublishedRelease(value, releaseRepository));
+      })
+      .catch(() => {
+        // The existing /releases/latest/download/ links remain usable if GitHub's API is unavailable.
+      });
+    return () => controller.abort();
+  }, []);
+
   return (
     <>
       <a className="skip-link" href="#main">
@@ -440,17 +475,16 @@ export function App() {
           <div className="wrap hero-content">
             <div className="hero-intro">
               <span className="section-label">
-                <span className="signal-dot" /> Real-time support for
-                conversations that matter
+                <span className="signal-dot" /> AI assistance for your desktop
               </span>
               <h1>Autopilot</h1>
               <p className="hero-statement">
-                Know what to say when it matters.
+                Your real-time AI assistant for interviews, meetings, and coding.
               </p>
               <p className="hero-description">
-                Autopilot listens for questions, understands what is on your
-                screen, and uses your CV to help you shape clear answers in real
-                time.
+                Autopilot listens to computer audio, detects questions and coding tasks,
+                and helps you respond in real time. Optional Screen Assist and your CV
+                provide relevant context when you need it.
               </p>
               <div className="hero-actions">
                 <a className="button button-primary" href="#download">
@@ -464,6 +498,7 @@ export function App() {
                 <WindowsIcon />
                 <AppleIcon /> Windows &amp; macOS <span /> Plans and payment
                 inside the app
+                {release && <> <span /> Latest {release.version}</>}
               </p>
             </div>
             <div id="live" className="hero-demonstration">
@@ -485,7 +520,7 @@ export function App() {
           <FeatureStory key={story.id} story={story} index={index} />
         ))}
         <ControlSection />
-        <DownloadSection />
+        <DownloadSection release={release} />
         <Questions />
       </main>
       <footer className="site-footer wrap">
